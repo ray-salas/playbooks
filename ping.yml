@@ -1,5 +1,5 @@
 - name: Test Ping
-  hosts: 192.168.10.140
+  hosts: all
   tasks:
     - name: Verificar conexión
       ping:
