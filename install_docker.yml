@@ -1,0 +1,52 @@
+---
+- name: Instalar Docker en Ubuntu
+  hosts: all
+  become: true  # Necesario para ejecutar tareas como superusuario (root)
+  tasks:
+    - name: Actualizar lista de paquetes
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600  # 1 hora de validez para la caché
+
+    - name: Instalar dependencias necesarias
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+
+    - name: Agregar la clave GPG oficial de Docker
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Agregar repositorio de Docker
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release | lower }} stable"
+        state: present
+
+    - name: Actualizar lista de paquetes después de agregar repositorio de Docker
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Instalar Docker
+      apt:
+        name: docker-ce
+        state: present
+
+    - name: Asegurarse de que el servicio de Docker esté activo y habilitado
+      systemd:
+        name: docker
+        enabled: yes
+        state: started
+
+    - name: Verificar la versión de Docker instalada
+      command: docker --version
+      register: docker_version
+
+    - name: Mostrar la versión de Docker
+      debug:
+        msg: "Docker instalado: {{ docker_version.stdout }}"
