@@ -1,5 +1,6 @@
 - name: Test Python connection
   hosts: 192.168.10.140
+  become: yes
   tasks:
     - name: Verificar la versión de Python
       command: python3 --version
