@@ -1,6 +1,6 @@
 ---
 - name: Instalar Docker en Debian 12.8.0
-  hosts: debian
+  hosts: all
   become: yes
   tasks:
 
