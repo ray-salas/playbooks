@@ -1,12 +1,14 @@
 ---
-- name: Instalar Docker en Ubuntu
-  hosts: all
-  become: true  # Necesario para ejecutar tareas como superusuario (root)
+- name: Instalar Docker en Debian 12.8.0
+  hosts: debian
+  become: yes
   tasks:
+
     - name: Actualizar lista de paquetes
       apt:
         update_cache: yes
-        cache_valid_time: 3600  # 1 hora de validez para la caché
+        cache_valid_time: 3600
+      become: true
 
     - name: Instalar dependencias necesarias
       apt:
@@ -14,39 +16,43 @@
           - apt-transport-https
           - ca-certificates
           - curl
-          - software-properties-common
+          - gnupg
+          - lsb-release
         state: present
+      become: true
 
-    - name: Agregar la clave GPG oficial de Docker
+    - name: Añadir la clave GPG de Docker
       apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
+        url: https://download.docker.com/linux/debian/gpg
         state: present
+      become: true
 
-    - name: Agregar repositorio de Docker
+    - name: Añadir el repositorio de Docker a APT
       apt_repository:
-        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release | lower }} stable"
+        repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_facts['distribution_major_version'] | int }} stable"
         state: present
-
-    - name: Actualizar lista de paquetes después de agregar repositorio de Docker
-      apt:
-        update_cache: yes
-        cache_valid_time: 3600
+      become: true
 
     - name: Instalar Docker
       apt:
         name: docker-ce
         state: present
+      become: true
 
-    - name: Asegurarse de que el servicio de Docker esté activo y habilitado
+    - name: Iniciar y habilitar el servicio de Docker
       systemd:
         name: docker
-        enabled: yes
         state: started
+        enabled: yes
+      become: true
 
-    - name: Verificar la versión de Docker instalada
+    - name: Verificar que Docker está instalado y funcionando
       command: docker --version
       register: docker_version
+      changed_when: false
+      become: true
 
-    - name: Mostrar la versión de Docker
+    - name: Mostrar la versión de Docker instalada
       debug:
-        msg: "Docker instalado: {{ docker_version.stdout }}"
+        msg: "Docker versión: {{ docker_version.stdout }}"
+
