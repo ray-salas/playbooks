@@ -17,12 +17,11 @@
           - gnupg
         state: present
 
-    - name: Add Docker's GPG key
-      command: >
-        curl -fsSL https://download.docker.com/linux/debian/gpg |
-        gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-      args:
-        creates: /usr/share/keyrings/docker-archive-keyring.gpg
+    - name: Download Docker's GPG key
+      get_url:
+        url: https://download.docker.com/linux/debian/gpg
+        dest: /usr/share/keyrings/docker-archive-keyring.gpg
+        mode: '0644'
 
     - name: Add Docker APT repository
       copy:
@@ -54,5 +53,6 @@
     - name: Show Docker version
       debug:
         var: docker_version.stdout
+
 
 
