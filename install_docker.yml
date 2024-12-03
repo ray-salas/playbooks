@@ -25,8 +25,7 @@
 
     - name: Add Docker APT repository
       copy:
-        content: |
-          deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian {{ ansible_lsb.codename }} stable
+        content: "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian {{ ansible_lsb.codename }} stable\n"
         dest: /etc/apt/sources.list.d/docker.list
 
     - name: Update APT cache after adding Docker repository
