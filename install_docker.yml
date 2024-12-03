@@ -4,11 +4,7 @@
   become: yes
   tasks:
 
-    - name: Ensure APT cache is up-to-date
-      apt:
-        update_cache: yes
-
-    - name: Install dependencies for Docker
+    - name: Install required dependencies
       apt:
         name:
           - apt-transport-https
@@ -17,18 +13,19 @@
           - gnupg
         state: present
 
-    - name: Download Docker's GPG key
-      get_url:
-        url: https://download.docker.com/linux/debian/gpg
-        dest: /usr/share/keyrings/docker-archive-keyring.gpg
-        mode: '0644'
+    - name: Add Docker's GPG key
+      shell: |
+        curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+      args:
+        creates: /usr/share/keyrings/docker-archive-keyring.gpg
 
-    - name: Add Docker APT repository
+    - name: Add Docker repository
       copy:
-        content: "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian {{ ansible_lsb.codename }} stable\n"
+        content: |
+          deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian bookworm stable
         dest: /etc/apt/sources.list.d/docker.list
 
-    - name: Update APT cache after adding Docker repository
+    - name: Update APT cache
       apt:
         update_cache: yes
 
@@ -40,7 +37,7 @@
           - containerd.io
         state: present
 
-    - name: Enable and start Docker service
+    - name: Enable and start Docker
       systemd:
         name: docker
         enabled: yes
@@ -53,6 +50,7 @@
     - name: Show Docker version
       debug:
         var: docker_version.stdout
+
 
 
 
